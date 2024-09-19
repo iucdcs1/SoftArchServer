@@ -36,3 +36,46 @@
     transform: rotate(360deg);
   }
 }
+
+.app {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 20px;
+  font-family: Arial, sans-serif;
+}
+
+h1 {
+  text-align: center;
+}
+
+.message-list {
+  margin-top: 20px;
+  border: 1px solid #ccc;
+  padding: 10px;
+  height: 300px;
+  overflow-y: scroll;
+}
+
+.message-item {
+  margin-bottom: 10px;
+  padding: 5px;
+  background-color: #f0f0f0;
+  border-radius: 5px;
+}
+
+.message-form {
+  margin-top: 20px;
+}
+
+.message-form input {
+  width: 80%;
+  padding: 10px;
+  font-size: 16px;
+}
+
+.message-form button {
+  padding: 10px;
+  font-size: 16px;
+  margin-left: 10px;
+}
+
