@@ -9,13 +9,18 @@ import (
 	"time"
 )
 
-type messageData struct {
+type MessageData struct {
 	Date time.Time `json:"created_at"`
 	Text string    `json:"text"`
 }
 
-func (d messageData) MarshalJSON() ([]byte, error) {
-	type Alias messageData
+type ResultingMessageData struct {
+	Date string `json:"created_at"`
+	Text string `json:"text"`
+}
+
+func (d MessageData) MarshalJSON() ([]byte, error) {
+	type Alias MessageData
 	return json.Marshal(&struct {
 		Date string `json:"created_at"`
 		*Alias
@@ -31,23 +36,31 @@ func GetMessages(c *gin.Context) {
 	err := initializers.DB.Model(&models.Message{}).Find(&messages).Error
 
 	if err != nil {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	var result []messageData
+	var result []ResultingMessageData
 	for _, msg := range messages {
-		result = append(result, messageData{Date: msg.Date, Text: msg.Text})
+		result = append(result, ResultingMessageData{
+			Date: msg.Date.Format("02.01.2006 15:04"),
+			Text: msg.Text,
+		})
 	}
 
 	c.IndentedJSON(http.StatusOK, result)
 }
 
 func SendMessage(c *gin.Context) {
-	var message messageData
+	var message MessageData
 
-	if err := c.BindJSON(&message); err != nil {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	if err := c.ShouldBindJSON(&message); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input"})
+		return
+	}
+
+	if message.Text == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Text field is required"})
 		return
 	}
 
@@ -59,11 +72,11 @@ func SendMessage(c *gin.Context) {
 	result := initializers.DB.Model(&models.Message{}).Create(&newMessage)
 
 	if result.Error != nil {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "Failed to send message"})
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "Failed to send message: " + result.Error.Error()})
 		return
 	}
 
-	responseMessage := messageData{
+	responseMessage := MessageData{
 		Date: newMessage.Date,
 		Text: newMessage.Text,
 	}
@@ -72,13 +85,13 @@ func SendMessage(c *gin.Context) {
 }
 
 func GetCount(c *gin.Context) {
-	var messages []messageData
-	err := initializers.DB.Model(&models.Message{}).Find(&messages).Error
+	var count int64
+	err := initializers.DB.Model(&models.Message{}).Count(&count).Error
 
 	if err != nil {
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	c.IndentedJSON(http.StatusOK, len(messages))
+	c.IndentedJSON(http.StatusOK, count)
 }

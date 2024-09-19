@@ -2,7 +2,6 @@ package initializers
 
 import (
 	"github.com/sirupsen/logrus"
-	"log"
 	"os"
 
 	"github.com/joho/godotenv"
@@ -12,9 +11,13 @@ func LoadEnvVariables() {
 	if os.Getenv("GITHUB_ACTIONS") == "" {
 		err := godotenv.Load("./.env")
 		if err != nil {
-			log.Fatal("Error loading .env file")
+			err := godotenv.Load("../.env")
+			if err != nil {
+				logrus.Warn("Error loading .env file: ", err)
+			}
+		} else {
+			logrus.Info("Env variables loaded successfully from .env file!")
 		}
-		logrus.Info("Env variables loaded successfully from .env file!")
 	} else {
 		logrus.Info("Env variables loaded from GitHub Actions secrets!")
 	}
