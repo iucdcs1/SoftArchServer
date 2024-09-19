@@ -23,7 +23,7 @@ func main() {
 	router.Use(cors.New(cors.Config{
 		AllowOrigins:  []string{"*"},
 		AllowMethods:  []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
-		AllowHeaders:  []string{"Content-Type", "access-control-allow-origin", "access-control-allow-headers"},
+		AllowHeaders:  []string{"Content-Type", "Access-Control-Allow-Credentials", "access-control-allow-origin", "access-control-allow-headers", "Authorization"},
 		ExposeHeaders: []string{"Content-Length"},
 	}))
 
@@ -40,7 +40,7 @@ func main() {
 	logrus.Info("Starting AnonChat API Service")
 
 	httpServer := &http.Server{
-		Addr:    ":8085",
+		Addr:    ":8089",
 		Handler: router,
 	}
 
